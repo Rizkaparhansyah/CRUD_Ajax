@@ -109,8 +109,11 @@ Route::resource('pengeluaran', PengeluaranController::class);
 Route::post('jual-unit', [PengeluaranController::class, 'update']);
 Route::get('list-terjual', [PengeluaranController::class, 'terjual']);
 Route::get('list-terjual/{id}', [PengeluaranController::class, 'list']);
-
 Route::get('/migrate', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return '✅ Migrasi berhasil dijalankan!';
+    Artisan::call('migrate:fresh', [
+        '--force' => true,
+        '--seed' => true,
+    ]);
+
+    return '✅ Migrasi dan seeder berhasil dijalankan!';
 });

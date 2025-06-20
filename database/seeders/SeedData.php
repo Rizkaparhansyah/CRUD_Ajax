@@ -15,19 +15,19 @@ class SeedData extends Seeder
     public function run(): void
     {
         // Insert kategori
-        Kategori::create(['nama' => 'Mobil']);
-        Kategori::create(['nama' => 'Motor']);
+        Kategori::create(['nama' => 'MOBIL']);
+        Kategori::create(['nama' => 'MOTOR']);
 
         // Insert merek
-        Merek::create(['nama' => 'Toyota']);
-        Merek::create(['nama' => 'Honda']);
-        Merek::create(['nama' => 'Yamaha']);
+        Merek::create(['nama' => 'TOYOTA']);
+        Merek::create(['nama' => 'HONDA']);
+        Merek::create(['nama' => 'YAMAHA']);
 
         // Insert jenis (dulu bernama type)
-        Types::create(['nama' => 'Avanza', 'kategori_id' => 1, 'merek_id' => 1]);
-        Types::create(['nama' => 'Mio Smile', 'kategori_id' => 2, 'merek_id' => 3]);
+        Types::create(['nama' => 'MIO', 'kategori_id' => 2, 'merek_id' => 3]);
         Types::create(['nama' => 'XRIDE 115', 'kategori_id' => 2, 'merek_id' => 3]);
-        Types::create(['nama' => 'Beat', 'kategori_id' => 2, 'merek_id' => 2]);
+        Types::create(['nama' => 'BEAT KARBU', 'kategori_id' => 2, 'merek_id' => 2]);
+        Types::create(['nama' => 'BEAT STARTER HALUS', 'kategori_id' => 2, 'merek_id' => 2]);
         Types::create(['nama' => 'VARIO KZR 125', 'kategori_id' => 2, 'merek_id' => 2]);
         Types::create(['nama' => 'VARIO LED NEW 125', 'kategori_id' => 2, 'merek_id' => 2]);
 
@@ -35,7 +35,17 @@ class SeedData extends Seeder
         Sparepart::create(['nama' => 'KAMPAS REM DEPAN',]);
         Sparepart::create(['nama' => 'KAMPAS REM BELAKANG',]);
         Sparepart::create(['nama' => 'OLI MESIN',]);
-        Sparepart::create(['nama' => 'Oli GARDAN',]);
+        Sparepart::create(['nama' => 'OLI GARDAN',]);
+        Sparepart::create(['nama' => 'STRING',]);
+        Sparepart::create(['nama' => 'AKI',]);
+        Sparepart::create(['nama' => 'KUMPON',]);
+        Sparepart::create(['nama' => 'SOLDER DKK',]);
+        Sparepart::create(['nama' => 'PERBAIKAN BAN',]);
+        Sparepart::create(['nama' => 'BAUD',]);
+        Sparepart::create(['nama' => 'REPAINT',]);
+        Sparepart::create(['nama' => 'ANGKER DINAMO',]);
+        Sparepart::create(['nama' => 'SPEEDO METER',]);
+        Sparepart::create(['nama' => 'JARUM SPEEDO METER',]);
         Sparepart::create(['nama' => 'MINYAK REM',]);
         
         // Saldo awal
