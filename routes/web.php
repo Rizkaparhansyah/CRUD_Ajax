@@ -117,3 +117,7 @@ Route::get('/migrate', function () {
 
     return '✅ Migrasi dan seeder berhasil dijalankan!';
 });
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+    return '✅ Storage link berhasil dibuat!';
+});
