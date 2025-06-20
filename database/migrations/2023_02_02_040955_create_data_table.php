@@ -15,11 +15,20 @@ return new class extends Migration
     {
         Schema::create('data', function (Blueprint $table) {
             $table->id();
-            $table->string('sumber_dana');
-            $table->string('program');
-            $table->enum('keterangan', ['Ada', 'Tidak Ada']);
+            $table->integer('kategori_id');
+            $table->integer('merek_id');
+            $table->integer('type_id');
+            $table->string('nopol');
+            $table->string('warna');
+            $table->integer('tahun');
+            $table->string('pajak');
+            $table->integer('harga');
+            $table->integer('harga_terjual')->default(0)->nullable();
+            $table->integer('bonus')->default(0)->nullable();
+            $table->string('status')->default(0);
             $table->timestamps();
         });
+
     }
 
     /**
@@ -31,4 +40,13 @@ return new class extends Migration
     {
         Schema::dropIfExists('data');
     }
+    public function fotos()
+    {
+        return $this->hasMany(DataFoto::class);
+    }
+    public function biayas()
+    {
+        return $this->hasMany(DatBiaya::class);
+    }
+
 };

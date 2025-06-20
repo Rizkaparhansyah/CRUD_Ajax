@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Data;
+use App\Models\Merek;
+use App\Models\Types;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
@@ -16,15 +18,8 @@ class DataAjaxController extends Controller
      */
     public function index()
     {
-
-
-        $data = Data::all();
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('aksi', function ($data) {
-                return view('data.tombol')->with('data', $data);
-            })
-            ->make(true);
+        $data = Data::with(['fotos', 'biayas', 'tipe'])->get();
+        return $data;
     }
 
     /**
@@ -43,30 +38,90 @@ class DataAjaxController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+   public function store(Request $request)
+{
+    // Fungsi bantu untuk konversi format rupiah ke angka
+    function rupiahToNumber($rupiah)
     {
-        $validasi = Validator::make($request->all(), [
-            'sumber_dana' => 'required',
-            'program' => 'required',
-            'keterangan' => 'required',
-        ], [
-            'sumber_dana.required' => ' Sumber Dana Wajib Di Isi',
-            'program.required' => ' Program Wajib Di Isi',
-            'keterangan.required' => 'Keterangan Wajib Di Isi',
-        ]);
+        return (int) preg_replace('/[^0-9]/', '', $rupiah);
+    }
 
-        if ($validasi->fails()) {
-            return response()->json(['errors' => $validasi->errors()]);
-        } else {
-            $data = [
-                'sumber_dana' => $request->sumber_dana,
-                'program' => $request->program,
-                'keterangan' => $request->keterangan,
-            ];
-            Data::create($data);
-            return response()->json(['success' => "Berhasil menyimpan data"]);
+    // Validasi input
+    $request->validate([
+        'nopol' => 'required',
+        'warna' => 'required',
+        'tahun' => 'required',
+        'harga' => 'required|numeric',
+    ]);
+
+    // Simpan atau update data utama
+    $data = Data::updateOrCreate(
+        ['id' => $request->id_barang],
+        [
+            'kategori_id' => $request->category_id,
+            'type_id'    => $request->nama,
+            'merek_id'   => $request->merk,
+            'nopol'      => $request->nopol,
+            'warna'      => $request->warna,
+            'tahun'      => $request->tahun,
+            'harga'      => $request->harga,
+            'pajak'      => $request->pajak,
+        ]
+    );
+
+    // Daftar biaya tetap
+    $biayaTetap = [
+        [
+            'nama' => 'Harga Barang',
+            'nominal' => rupiahToNumber($request->hargaBarang)
+        ],
+        [
+            'nama' => 'Biaya Pajak',
+            'nominal' => rupiahToNumber($request->biaya_pajak)
+        ],
+        [
+            'nama' => 'Oprasional',
+            'nominal' => rupiahToNumber($request->oprasional)
+        ],
+    ];
+
+    // Simpan biaya tetap dengan updateOrCreate
+    foreach ($biayaTetap as $biaya) {
+        $data->biayas()->updateOrCreate(
+            ['nama' => $biaya['nama']],
+            ['nominal' => $biaya['nominal']]
+        );
+    }
+
+    // Ambil sparepart dari request (format JSON string)
+    $sparepart_list = $request->sparepart_list ?? '[]';
+    $spareparts = json_decode($sparepart_list, true) ?? [];
+
+    // Simpan sparepart juga pakai updateOrCreate (berdasarkan nama)
+    foreach ($spareparts as $sp) {
+        $data->biayas()->updateOrCreate(
+            ['nama' => $sp['nama']],
+            ['nominal' => $sp['nominal']]
+        );
+    }
+
+    // Hapus biaya yang tidak ada di input (sinkronisasi)
+    $semuaNamaBiaya = collect($biayaTetap)->pluck('nama')
+        ->merge(collect($spareparts)->pluck('nama'))->all();
+
+    $data->biayas()->whereNotIn('nama', $semuaNamaBiaya)->delete();
+
+    // Upload dan simpan foto jika ada
+    if ($request->hasFile('fotos')) {
+        foreach ($request->file('fotos') as $file) {
+            $path = $file->store('uploads/data', 'public');
+            $data->fotos()->create(['path' => $path]);
         }
     }
+
+    return response()->json(['success' => true]);
+}
+
 
     /**
      * Display the specified resource.
@@ -100,27 +155,7 @@ class DataAjaxController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validasi = Validator::make($request->all(), [
-            'sumber_dana' => 'required',
-            'program' => 'required',
-            'keterangan' => 'required',
-        ], [
-            'sumber Dana.required' => ' Sumber Dana Wajib Di Isi',
-            'program.required' => ' Program Wajib Di Isi',
-            'keterangan.required' => 'Keterangan Wajib Di Isi',
-        ]);
-
-        if ($validasi->fails()) {
-            return response()->json(['errors' => $validasi->errors()]);
-        } else {
-            $data = [
-                'sumber_dana' => $request->sumber_dana,
-                'program' => $request->program,
-                'keterangan' => $request->keterangan,
-            ];
-            Data::where('id', $id)->update($data);
-            return response()->json(['success' => "Berhasil Melakukan Update Data"]);
-        }
+        dd($request->all());
     }
 
     /**
@@ -133,7 +168,17 @@ class DataAjaxController extends Controller
     {
         Data::where('id', $id)->delete();
     }
-    public function ajax()
+    public function getSelect($id, $params)
     {
+        if ($params === 'merek') {
+            $data = Merek::where('kategori_id', $id)->get();
+        } elseif ($params === 'type') {
+            $data = Types::where('merek_id', $id)->get();
+        } else {
+            return response()->json(['error' => 'Param tidak dikenali'], 400);
+        }
+
+        return response()->json($data);
     }
+
 }

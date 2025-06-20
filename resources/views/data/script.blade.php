@@ -1,173 +1,613 @@
-<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
-<script src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
 <script>
-    $(document).ready(function() {
-        var table = $('#myTable').DataTable({
-            processing: true,
-            serverside: true,
-            ajax: "{{url('dataAjax')}}",
-            columns: [{
-                    data: 'DT_RowIndex',
-                    name: 'DT_RowIndex',
-                    orderable: false,
-                    searchable: false,
-                },
-                {
-                    data: 'sumber_dana',
-                    name: 'sumber_dana',
-                },
-                {
-                    data: 'program',
-                    name: 'program',
-                },
-                {
-                    data: 'keterangan',
-                    name: 'keterangan',
-                },
-                {
-                    data: 'aksi',
-                    name: 'aksi',
-                }
-            ],
-            initComplete: function() {
-                var selectOptions = [];
-                var columnData = table.column(1).data();
+    const formatRupiahToNumber = (str) => {
+    return parseInt(str.replace(/[^0-9]/g, ''), 10) || 0;
+    };
+    const formatNumberToRupiah = (angka) => {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(angka);
+    };
 
-                $.each(columnData, function(index, value) {
-                    if ($.inArray(value, selectOptions) === -1) {
-                        selectOptions.push(value);
-                    }
-                });
-
-                $.each(selectOptions, function(index, value) {
-                    $('#filter_sumber_dana').append($('<option>', {
-                        value: value,
-                        text: value
-                    }));
-                });
-
-            },
+    let sparepartList = [];
+    function hitung() {
+        const pajak = formatRupiahToNumber($('#biaya_pajak').val()) || 0;
+        const oprasional = formatRupiahToNumber($('#oprasional').val()) || 0;
+        const hargabeli = formatRupiahToNumber($('#hargaBarang').val()) || 0;
+        
+        let totalSparepart = 0;
+        sparepartList.forEach(item => {
+            totalSparepart += parseInt(item.nominal);
         });
-
-        // reload page
-        $(document).ready(function() {
-            $("#button-reload").click(function() {
-                location.reload();
-            });
-        });
-        $('#filter-keterangan').change(function() {
-            table.column(3).search($(this).val())
-                .draw();
-        })
-        $('#filter_sumber_dana').on('change', function() {
-            table.column(1).search(this.value).draw();
-        });
-    });
-
-
-    // GLOBAL SETUP 
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    // 02_PROSES SIMPAN 
-    $('body').on('click', '.tombol-tambah', function(e) {
-        e.preventDefault();
-        $('#exampleModal').modal('show');
-        $('.tombol-simpan').click(function() {
-            simpan();
-        });
-    });
-
-
-
-    // proses edit
-    $('body').on('click', '.tombol-edit', function(e) {
-        var id = $(this).data('id');
-        $.ajax({
-            url: 'dataAjax/' + id + '/edit',
-            type: 'GET',
-            success: function(response) {
-                $('#exampleModal').modal('show');
-                $('#sumber_dana').val(response.result.sumber_dana);
-                $('#program').val(response.result.program);
-                $('#keterangan').val(response.result.keterangan);
-                $('.tombol-simpan').click(function() {
-                    simpan(id);
-                })
-
-            }
-        })
-    });
-
-
-    // fungsi simpan dan update
-    function simpan(id = '') {
-        if (id == '') {
-            var var_url = 'dataAjax';
-            var var_type = 'POST';
-        } else {
-            var var_url = 'dataAjax/' + id;
-            var var_type = 'PUT';
-        }
-        $.ajax({
-            url: var_url,
-            type: var_type,
-            data: {
-                sumber_dana: $('#sumber_dana').val(),
-                program: $('#program').val(),
-                keterangan: $('#keterangan').val()
-            },
-            success: function(response) {
-                if (response.errors) {
-                    console.log(response.errors);
-                    $('.alert-danger').removeClass('d-none');
-                    $('.alert-danger').html("<ul>");
-                    $.each(response.errors, function(key, value) {
-                        $('.alert-danger').find('ul').append("<li>" + value +
-                            "</li>");
-                    });
-                    $('.alert-danger').append("</ul>");
-                } else {
-                    $('.alert-success').removeClass('d-none');
-                    $('.alert-success').html(response.success);
-                }
-                $('#myTable').DataTable().ajax.reload();
-            }
-        });
+        const total = hargabeli + pajak + oprasional + totalSparepart;
+        $('#totalHarga').html(formatNumberToRupiah(total));
+        $('#harga').val(total);
     }
 
+    function renderList() {
+        let html = '';
+        sparepartList.forEach((item, index) => {
+        html += `
+            <div class="d-flex justify-content-between fw-bold align-items-center border p-2 rounded mb-2">
+            <div>
+                ${item.nama} - ${formatNumberToRupiah(item.nominal)}
+            </div>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">hapus</button>
+            </div>
+        `;
+        });
 
+        $('.list').html(html);
+        $('#inputSpareparts').val(JSON.stringify(sparepartList));
+    }
 
-
-    // proses delete
-    $('body').on('click', '.tombol-del', function(e) {
-        if (confirm('Yakin mau hapus data ini?') == true) {
-            var id = $(this).data('id');
+    function removeItem(index) {
+        sparepartList.splice(index, 1);
+        renderList();
+    }
+    
+    function getAPI(url) {
+        return new Promise(function(resolve, reject) {
             $.ajax({
-                url: 'dataAjax/' + id,
-                type: 'DELETE',
+                type: "GET",
+                url: url,
+                success: function (response) {
+                    resolve(response);
+                },
+                error: function (xhr) {
+                    reject(xhr);
+                }
             });
-            $('#myTable').DataTable().ajax.reload();
-        } else {
+        });
+    }
+    function postAPI(url, data, method = 'POST') {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+            url: url, // ganti sesuai route Laravel kamu
+            type: method,
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                resolve(response);
+            },
+            error: function (xhr) {
+                reject(xhr);
+            }
+            });
+        });
+    }
+    function showDetailModal(data) {
+        // Kosongkan isi sebelumnya
+        $('#carouselFotoContainer').empty();
+        $('#detailList').empty();
 
+        // Isi carousel foto
+        if (data.fotos && data.fotos.length > 0) {
+            data.fotos.forEach((foto, index) => {
+            const activeClass = index === 0 ? 'active' : '';
+            const item = `
+                <div class="carousel-item ${activeClass}">
+                <img src="/storage/${foto.path}" class="d-block w-100" style="object-fit:cover; height:500px;" alt="Foto ${index + 1}">
+                </div>
+            `;
+            $('#carouselFotoContainer').append(item);
+            });
+        } else {
+            $('#carouselFotoContainer').html(`
+            <div class="carousel-item active">
+                <img src="https://via.placeholder.com/600x300?text=No+Image" class="d-block w-100" alt="No Image">
+            </div>
+            `);
         }
+      
+        // Isi detail kendaraan
+        const detailHtml = `
+            <li class="list-group-item text-uppercase fw-bold">JENIS/NOPOL: ${data.tipe.nama ?? '-'} - ${data.nopol ?? '-'}</li>
+            <li class="list-group-item text-uppercase fw-bold">Warna: ${data.warna ?? '-'}</li>
+            <li class="list-group-item text-uppercase fw-bold">Tahun: ${data.tahun ?? '-'}</li>
+            <li class="list-group-item text-uppercase fw-bold">Pajak: ${data.pajak ?? '-'}</li>
+            <li class="list-group-item text-uppercase fw-bold">Bonus: ${data.bonus ?? '-'}</li>
+            <li class="list-group-item text-uppercase">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Total Harga:</span>
+                    <a class="btn btn-sm btn-link  text-uppercase fw-bold" data-bs-toggle="collapse" href="#hargaDetail" role="button" aria-expanded="false" aria-controls="hargaDetail">
+                    Rp${Number(data.harga).toLocaleString()}
+                    </a>
+                </div>
+
+                <div class="collapse mt-2" id="hargaDetail">
+                    <ul class="list-group list-group-flush">
+                    ${(data.biayas ?? []).map(biaya => `
+                        <li class="list-group-item text-uppercase">${biaya.nama}: Rp${Number(biaya.nominal).toLocaleString()}</li>
+                    `).join('')}
+                    </ul>
+                </div>
+                </li>
+
+        `;
+        $('#detailList').html(detailHtml);
+
+        // Tampilkan modal
+        const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+        modal.show();
+    }
+    function showEditModal(data) {
+        // Kosongkan isi sebelumnya
+        console.log('data', data)
+       
+       let oprasional = data.biayas.find(item => item.nama === 'Oprasional');
+       let hargaBeli = data.biayas.find(item => item.nama === 'Harga Barang');
+       let biayaPajak = data.biayas.find(item => item.nama === 'Biaya Pajak');
+       let sparepartLists = data.biayas
+        .filter(item => !['Biaya Pajak', 'Oprasional', 'Harga Barang'].includes(item.nama))
+        .map(item => ({
+            id: item.id,
+            nama: item.nama,
+            nominal: item.nominal
+        }));
+        sparepartList = sparepartLists
+        // console.log('sparepart', spareparts)
+        console.log('sparepartList', sparepartList)
+
+        $('#id_barang').val(data.id)
+        $('#category_id').val(data.id).trigger('change')
+        $('#merkmotor').val(data.merek_id).trigger('change')
+        // Tunggu beberapa saat sebelum set #type
+        setTimeout(function () {
+        $('#type').val(data.type_id).trigger('change');
+        }, 3000); 
+        $('#nopol').val(data.nopol)
+        $('#warna').val(data.warna)
+        $('#tahun').val(data.tahun)
+        $('#hargaBarang').val(hargaBeli.nominal )
+        $('#pajak').val(data.pajak)
+        $('#biaya_pajak').val(biayaPajak.nominal)
+        $('#oprasional').val(oprasional.nominal)
+        // $('#fotos').val(data.)
+        // Tampilkan modal
+        renderList()
+        const modal = new bootstrap.Modal(document.getElementById('formModal'));
+        modal.show();
+    }
+
+    $(document).ready(function () {
+        $('#formModal').on('hidden.bs.modal', function () {
+        $('#id_barang').val('');
+        });
+        async function renderData() {
+            try {
+                const dataList = await getAPI('/dataAjax');
+                console.log('dataList', dataList)
+                $('#fotosContainer').empty();
+
+                dataList.forEach(data => {
+                    const fotoPath = data.fotos && data.fotos.length > 0
+                        ? `/storage/${data.fotos[0].path}`
+                        : 'https://via.placeholder.com/300x200?text=No+Image';
+
+                    const card = `
+                    <div class="card position-relative col-md-4 p-3">
+                            <!-- ICON STATUS DI POJOK KANAN ATAS -->
+                            ${data.status == 1
+                                ? `<i class="bi px-2 bg-success rounded bi-check text-white position-absolute top-0 end-0 m-2 fs-4"></i>`
+                                : `<i class="bi px-2 rounded bg-white bi-hourglass-split text-warning position-absolute top-0 end-0 m-2 fs-4"></i>`
+                            }
+
+                            <img src="${fotoPath}" class="card-img-top" style="height: 200px; width: 100%; object-fit: cover; object-position: center;" alt="Foto Kendaraan">
+
+                            <div class="card-body text-uppercase">
+                                <h5 class="card-title fw-bold">${data.tipe.nama ?? 'Tipe'} - ${data.nopol ?? 'Nopol'}</h5>
+                                <p class="card-text">Warna: ${data.warna ?? '-'}</p>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="fs-6">Harga Modal: </div>
+                                    <div class="card-title fw-bold fs-1">${formatNumberToRupiah(data.biayas?.reduce((sum, item) => sum + (item.nominal || 0), 0))}</div>    
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="fs-6">Harga Jual: </div>
+                                    <div class="card-title fw-bold fs-1">${formatNumberToRupiah(data.harga_terjual ?? 0)}</div>    
+                                </div>
+                                
+                                <div class="d-flex justify-content-between gap-2">
+                                    <button onclick='showDetailModal(${JSON.stringify(data)})' class="btn btn-primary w-75">
+                                        <i class="bi px-2 rounded bi-eye text-white"></i>
+                                        Detail</button>
+                                    
+                                    <button onclick='showEditModal(${JSON.stringify(data)})' class="btn btn-warning w-75 text-white">
+                                        <i class="bi px-2 rounded bi-pen text-white"></i>
+                                        Edit
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    `;
+                    $('#fotosContainer').append(card);
+                });
+
+            } catch (err) {
+                console.error('Gagal ambil data:', err);
+                alert('Gagal mengambil data. Cek console.');
+            }
+        }
+        renderData()
+
+    //TABLE
+        function Table(table, url, columns = [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+                    { data: 'nama', name: 'nama' },
+                    { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
+                ]) {
+            $(table).DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: url,
+                pageLength: 5, // ← hanya tampilkan table (tanpa search, pagination, info, dll)
+                columns: columns
+            });
+        }
+
+        Table('#kategoriTable', 'kategori')
+        Table('#merekTable', 'merek')
+        Table('#sparepartTable', 'sparepart')
+        Table('#tipeTable', 'tipe', [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+            { data: 'nama', name: 'nama' },
+            { data: 'kategori', name: 'kategori' }, // ← tampilkan nama kategori
+            { data: 'merek', name: 'merek' },       // ← tampilkan nama merek
+            { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
+        ]);
+        Table('#pengeluaranTable', 'pengeluaran', [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+            { data: 'nama', name: 'nama' },
+            { data: 'nominal', name: 'nominal' }, // ← tampilkan nama kategori
+            { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
+        ]);
+        Table('#penjualanTable', 'list-terjual', [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+            { data: 'nama', name: 'nama' },
+            { data: 'harga', name: 'harga', render: function(data, type, row) {
+                return formatNumberToRupiah(data);
+            } }, // ← tampilkan nama kategori
+            { data: 'bonus', name: 'bonus' , render: function(data, type, row) {
+                return formatNumberToRupiah(data);
+            }}, // ← tampilkan nama kategori
+            { data: 'harga_terjual', name: 'harga_terjual', render: function(data, type, row) {
+                return formatNumberToRupiah(data);
+            } }, // ← tampilkan nama kategori
+            { data: 'laba', name: 'laba', render: function(data, type, row) {
+                return formatNumberToRupiah(data);
+            } }, // ← tampilkan nama kategori
+        ]);
+
+    // END TABLE
+
+    // fungsi reuseble crud
+        function editCrud(init) {
+            console.log('init', init);
+            $(init.id).val(init?.valID);
+            $(init.nama).val(init?.valNama); // ← perbaiki di sini
+        }
+
+        async function formCrud(init) {
+            const response = await postAPI(init?.api?.url, init?.api?.data, init?.api?.method);
+            
+            $(init.table).DataTable().ajax.reload();
+            $(init.idHide).val('')
+            $(init.form)[0].reset();
+        }
+    // end fungsi reuseble crud
+
+    // PENJUALAN
+    $('#formPenjualan').on('submit', async function (e) {
+        e.preventDefault();
+        // let id = $('#kendaraan_id').val()
+        const data = {
+            api : {
+                url: `jual-unit`,
+                data :  new FormData(this),
+                // method : 'PATCH'
+            },
+            table: '#penjualanTable',
+            idHide: '#idHidePenjualan',
+            form: '#formPenjualan',
+        }
+        formCrud(data)
     });
 
+    $('#kendaraan_id').on('change', async function(){
+        let id = $(this).val()
+        try {
+            const data = await getAPI(`list-terjual/${id}`);
+            $('#penjualan_nominal').val(data.harga_terjual)
+            $('#bonus_nominal').val(data.bonus)
+        } catch (err) {
+            console.error('Gagal ambil data:', err);
+            alert('Gagal mengambil data. Cek console.');
+        }
+    })
+    
+
+    // END PENJUALAN
+
+    // KATEGORI
+
+        $(document).on('click', '.editKategori', function () {
+            let id = $(this).data('id');
+            let nama = $(this).data('nama');
+            const init = {
+                id : '#idHideKategori',
+                nama : '#nama_kategori',
+                valID : id,
+                valNama : nama,
+            }
+            editCrud(init)
+        });
+        
+        $('#formKategori').on('submit', async function (e) {
+            e.preventDefault();
+            const data = {
+                api : {
+                    url: 'kategori',
+                    data :  new FormData(this)
+                },
+                table: '#kategoriTable',
+                idHide: '#idHideKategori',
+                form: '#formKategori',
+            }
+            formCrud(data)
+        });
+
+        $(document).on('click', '.deleteKategori', async function () {
+            let id = $(this).data('id');
+            await postAPI(`kategori/${id}`, null, 'DELETE');
+            $('#kategoriTable').DataTable().ajax.reload();
+        });
+
+    // END KATEGORI
+
+    // MEREK
+
+        $(document).on('click', '.editMerek', function () {
+            let id = $(this).data('id');
+            let nama = $(this).data('nama');
+            const init = {
+                id : '#id_nama_merek',
+                nama : '#nama_merek',
+                valID : id,
+                valNama : nama,
+            }
+            editCrud(init)
+        });
+        
+        $('#formMerek').on('submit', async function (e) {
+            e.preventDefault();
+            const data = {
+                api : {
+                    url: 'merek',
+                    data :  new FormData(this)
+                },
+                table: '#merekTable',
+                idHide: '#id_nama_merek',
+                form: '#formMerek',
+            }
+            formCrud(data)
+        });
+
+        $(document).on('click', '.deleteMerek', async function () {
+            let id = $(this).data('id');
+            await postAPI(`merek/${id}`, null, 'DELETE');
+            $('#merekTable').DataTable().ajax.reload();
+        });
+
+    // END MEREK
+
+    // TIPE
+        $(document).on('click', '.editTipe', function () {
+            let id = $(this).data('id');
+            let nama = $(this).data('nama');
+            let kategoriID = $(this).data('kategori');
+            let merekID = $(this).data('merek');    
+            
+            $('#category_id').val(kategoriID)
+            $('#tipe_merek_motor').val(merekID)
+            $('#nama_tipe').val(nama)
+            $('#id_nama_tipe').val(id)
+        });
+        
+        $('#formTipe').on('submit', async function (e) {
+            e.preventDefault();
+            const data = {
+                api : {
+                    url: 'tipe',
+                    data :  new FormData(this)
+                },
+                table: '#tipeTable',
+                idHide: '#id_nama_tipe',
+                form: '#formTipe',
+            }
+            formCrud(data)
+        });
+
+        $(document).on('click', '.deleteTipe', async function () {
+            let id = $(this).data('id');
+            await postAPI(`tipe/${id}`, null, 'DELETE');
+            $('#tipeTable').DataTable().ajax.reload();
+        });
+    // END TIPE
+
+    // SPAREPART
+
+        $(document).on('click', '.editSparepart', function () {
+            let id = $(this).data('id');
+            let nama = $(this).data('nama');
+            const init = {
+                id : '#id_nama_sparepart',
+                nama : '#nama_sparepart',
+                valID : id,
+                valNama : nama,
+            }
+            editCrud(init)
+        });
+        
+        $('#formSparepart').on('submit', async function (e) {
+            e.preventDefault();
+            const data = {
+                api : {
+                    url: 'sparepart',
+                    data :  new FormData(this)
+                },
+                table: '#sparepartTable',
+                idHide: '#id_nama_sparepart',
+                form: '#formSparepart',
+            }
+            formCrud(data)
+        });
+
+        $(document).on('click', '.deleteSparepart', async function () {
+            let id = $(this).data('id');
+            await postAPI(`sparepart/${id}`, null, 'DELETE');
+            $('#sparepartTable').DataTable().ajax.reload();
+        });
+
+    // END SPAREPART
+
+    // PENGELUARAN
+
+        $(document).on('click', '.editPengeluaran', function () {
+            let id = $(this).data('id');
+            let nama = $(this).data('nama');
+            let nominal = $(this).data('nominal');
+            $('#idHidePengeluaran').val(id)
+            $('#nama_pengeluaran').val(nama)
+            $('#pengeluaran_nominal').val(nominal)
+            
+        });
+        
+        $('#formPengeluaran').on('submit', async function (e) {
+            e.preventDefault();
+            const data = {
+                api : {
+                    url: 'pengeluaran',
+                    data :  new FormData(this)
+                },
+                table: '#pengeluaranTable',
+                idHide: '#id_nama_pengeluaran',
+                form: '#formPengeluaran',
+            }
+            formCrud(data)
+            renderData()
+        });
+
+        $(document).on('click', '.deletePengeluaran', async function () {
+            let id = $(this).data('id');
+            await postAPI(`pengeluaran/${id}`, null, 'DELETE');
+            $('#pengeluaranTable').DataTable().ajax.reload();
+        });
+
+    // END PENGELUARAN
 
 
-    // get modal & value
-    $('#exampleModal').on('hidden.bs.modal', function() {
-        $('#sumber_dana').val('');
-        $('#program').val('');
-        $('#keterangan').val('');
+    document.querySelectorAll('.rupiah').forEach(input => {
+        input.addEventListener('input', function () {
+            hitung()
+            let angka = this.value.replace(/[^0-9]/g, '');
+            this.value = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
+        });
+    });
 
-        $('.alert-danger').addClass('d-none');
-        $('.alert-danger').html('');
+    
+    async function select(id, selectId, params){
+        if (!id) {
+            $(selectId).html('<option value="">-- PILIH --</option>');
+            return;
+        }
+        
+        try {
+            const merek = await getAPI(`merek/${id}/${params}`);
+            let options = '<option value="">-- PILIH --</option>';
+            merek.forEach(item => {
+                options += `<option value="${item.id}">${item.nama}</option>`;
+            });
+            $(selectId).html(options);
+        } catch (err) {
+            console.error('Gagal ambil data:', err);
+            alert('Gagal mengambil data. Cek console.');
+        }
+    }
 
-        $('.alert-success').addClass('d-none');
-        $('.alert-success').html('');
+        // $('#category_id').on('change', async function () {
+        //     const id = $(this).val();
+        //     select(id, '#merkmotor', 'merek')
+        // });
+
+        $('#merkmotor').on('change', async function () {
+            const id = $(this).val();
+            select(id, '#type', 'type')
+        });
+
+
+        $('#addBtn').on('click', function () {
+            const sparepartId = $('#sparepart').val();
+            const sparepartText = $('#sparepart option:selected').text();
+            const harga = $('#hargaSparepart').val();
+
+            if (!sparepartId) {
+            alert('Silakan pilih sparepart dan isi nominal yang valid');
+            return;
+            }
+
+            // Cek apakah sparepart sudah ada dalam list
+            const existing = sparepartList.find(item => item.id === sparepartId);
+
+            if (existing) {
+            // Jika sudah ada, tambahkan nominalnya
+            existing.nominal += harga;
+            } else {
+            // Jika belum, tambahkan item baru
+            sparepartList.push({
+                id: sparepartId,
+                nama: sparepartText,
+                nominal: formatRupiahToNumber(harga)
+            });
+            }
+
+            // Reset input
+            $('#sparepart').val('');
+            $('#hargaSparepart').val('');
+            hitung()
+            renderList();
+        });
+
+     
+        
+        
+        //post data
+        
+        $('#formBarang').on('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const response = await postAPI(`dataAjax`, formData);
+            // console.log('response', response)
+            alert('Data berhasil disimpan!');
+            $('#formBarang')[0].reset(); // reset form
+            $('.list').empty(); // hapus list sparepart
+            sparepartList.length = 0; // reset array
+            $('#inputSpareparts').val('');
+            $('#formModal').modal('hide');
+            renderData()
+        });
+
+        
+
+
     });
 </script>
