@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('data_biayas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('data_id')->constrained('data')->onDelete('cascade')->nullable();
+            $table->foreignId('data_id')->nullable()->constrained('data')->onDelete('cascade');
             $table->string('nama');
             $table->integer('nominal');
             $table->timestamps();
