@@ -121,3 +121,6 @@ Route::get('/storage-link', function () {
     Artisan::call('storage:link');
     return '✅ Storage link berhasil dibuat!';
 });
+Route::get('/test', function () {
+    return 'test';
+});
