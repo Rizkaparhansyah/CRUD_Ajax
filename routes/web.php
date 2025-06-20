@@ -15,6 +15,7 @@ use App\Models\Types;
 use App\Models\Data;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -108,3 +109,8 @@ Route::resource('pengeluaran', PengeluaranController::class);
 Route::post('jual-unit', [PengeluaranController::class, 'update']);
 Route::get('list-terjual', [PengeluaranController::class, 'terjual']);
 Route::get('list-terjual/{id}', [PengeluaranController::class, 'list']);
+
+Route::get('/migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return '✅ Migrasi berhasil dijalankan!';
+});
