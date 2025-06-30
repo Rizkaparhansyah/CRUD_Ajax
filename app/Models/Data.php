@@ -25,4 +25,14 @@ class Data extends Model
     {
         return $this->hasMany(\App\Models\DataBiaya::class);
     }
+
+     public function bonus()
+    {
+        return $this->hasMany(\App\Models\Bonus::class);
+    }
+    
+     public function partners()
+    {
+        return $this->belongsTo(Partner::class);
+    }
 }

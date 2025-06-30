@@ -7,6 +7,7 @@ use App\Models\Kategori;
 use App\Models\Merek;
 use App\Models\Types;
 use App\Models\Sparepart;
+use App\Models\Partner;
 use App\Models\Data;
 use App\Models\SaldoAwal;
 
@@ -36,12 +37,10 @@ class SeedData extends Seeder
         Sparepart::create(['nama' => 'KAMPAS REM BELAKANG',]);
         Sparepart::create(['nama' => 'OLI MESIN',]);
         Sparepart::create(['nama' => 'OLI GARDAN',]);
-        Sparepart::create(['nama' => 'STRING',]);
         Sparepart::create(['nama' => 'AKI',]);
-        Sparepart::create(['nama' => 'KUMPON',]);
-        Sparepart::create(['nama' => 'SOLDER DKK',]);
-        Sparepart::create(['nama' => 'PERBAIKAN BAN',]);
-        Sparepart::create(['nama' => 'BAUD',]);
+        Sparepart::create(['nama' => 'SPION',]);
+        Sparepart::create(['nama' => 'COVER BODY',]);
+        Sparepart::create(['nama' => 'STRIPING',]);
         Sparepart::create(['nama' => 'REPAINT',]);
         Sparepart::create(['nama' => 'ANGKER DINAMO',]);
         Sparepart::create(['nama' => 'SPEEDO METER',]);
@@ -50,6 +49,10 @@ class SeedData extends Seeder
         
         // Saldo awal
         SaldoAwal::create(['nominal' => 32000000,]);
+
+        //PARTNER
+        Partner::create(['nama' => "DIAN HADY ALI NURDIN", 'persentase' => 60, 'owner' => 1,]);
+        Partner::create(['nama' => "ROBBY FIRMANSYAH", 'persentase' => 40, 'owner' => 0,]);
         
         // Insert data
         // $data = Data::create([

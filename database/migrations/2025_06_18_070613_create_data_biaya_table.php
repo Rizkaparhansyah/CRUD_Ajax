@@ -15,9 +15,11 @@ return new class extends Migration
     {
         Schema::create('data_biayas', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
             $table->foreignId('data_id')->nullable()->constrained('data')->onDelete('cascade');
             $table->string('nama');
             $table->integer('nominal');
+            $table->integer('from')->nullable();
             $table->timestamps();
         });
     }

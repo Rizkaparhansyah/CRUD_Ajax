@@ -13,9 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pengeluarans', function (Blueprint $table) {
+        Schema::create('partners', function (Blueprint $table) {
             $table->id();
-            $table->id();
+            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
+            $table->string('nama');
+            $table->integer('persentase')->nullable();
+            $table->integer('owner')->default(0);
+            $table->integer('kas')->default(0);
             $table->timestamps();
         });
     }
@@ -27,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pengeluarans');
+         Schema::dropIfExists('partners');
     }
 };

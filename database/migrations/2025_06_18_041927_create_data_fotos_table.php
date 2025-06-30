@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('data_fotos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
             $table->foreignId('data_id')->nullable()->constrained('data')->onDelete('cascade');
             $table->string('path'); // atau 'url' kalau kamu simpan di cloud
             $table->timestamps();

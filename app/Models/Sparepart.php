@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Sparepart extends Model
 {
     use HasFactory;
-    protected $tabel = 'spareparts';
+    protected $table = 'spareparts';
     protected $guarded = [];
 
 }

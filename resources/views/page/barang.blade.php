@@ -3,38 +3,165 @@
 @section('title', 'Data Barang')
 
 @section('content')
-    
-    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#formModal">
-        Tambah Barang
-    </button>
+   <!-- Tombol Hamburger (hanya muncul di layar kecil) -->
+    <nav class="navbar bg-light d-md-none">
+        <div class="container-fluid">
+            <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+                <i class="bi bi-list fs-3"></i>
+            </button>
+            <span class="navbar-brand mb-0 h1">Menu</span>
+        </div>
+    </nav>
 
-    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#formModalKategori">
-        Kategori
-    </button>
+    <div class="d-flex">
+        <!-- Sidebar: Offcanvas untuk mobile, visible tetap untuk desktop -->
+        <div class="offcanvas-md offcanvas-start bg-light p-3 border-end" tabindex="-1" id="sidebarMenu" style="width: 250px;">
+            <div class="offcanvas-header d-md-none">
+                <h5 class="offcanvas-title">Menu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+            </div>
 
-    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#formModalMerek">
-        Merek
-    </button>
+            <div class="offcanvas-body p-3">
+                <div class="d-flex flex-column gap-2">
+                    <button type="button" class="btn btn-success d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#formModalPenjualan">
+                        <i class="bi bi-cart-plus"></i> Entry Penjualan & Set Bonus
+                    </button>
+                    
+                    <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#formModal">
+                        <i class="bi bi-box-seam"></i> Entry Unit
+                    </button>
 
-    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#formModalTipe">
-        Tipe
-    </button>
+                    <a href="/fins" class="btn btn-outline-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-journal-text"></i> FINS
+                    </a>
 
-    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#formModalSparepart">
-        Saprepart
-    </button>
+                    <button type="button" class="btn btn-outline-warning d-flex align-items-center gap-2 text-dark" data-bs-toggle="modal" data-bs-target="#formModalPengeluaran">
+                        <i class="bi bi-cash-stack"></i> Pengeluaran
+                    </button>
+
+                    <button type="button" class="btn btn-outline-info d-flex align-items-center gap-2 text-dark" data-bs-toggle="modal" data-bs-target="#formModalSetmodal">
+                        <i class="bi bi-gear"></i> Set modal
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#formModalPartner">
+                        <i class="bi bi-people"></i> Partner
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#formModalKategori">
+                        <i class="bi bi-tags"></i> Kategori
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#formModalMerek">
+                        <i class="bi bi-building"></i> Merek
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#formModalTipe">
+                        <i class="bi bi-car-front-fill"></i> Tipe
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#formModalSparepart">
+                        <i class="bi bi-tools"></i> Sparepart
+                    </button>
+
+                    
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Konten Utama -->
+        <div class="flex-grow-1 p-4">
+            <h1 class="mb-4">Selamat Datang</h1>
+
+            <!-- Konten data card -->
+            <div id="fotosContainer" class="row">
+                <!-- Card akan ditambahkan di sini -->
+            </div>
+        </div>
+    </div>
+
+
+    {{-- MODAL AWAL --}}
+    <div class="modal fade" id="formModalSetmodal" tabindex="-1" aria-labelledby="formModalSetmodalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <form id="formSaldoAwal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="formModalSetmodalLabel">Form Modal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3 mb-4">
+                            
+                            <div class="col-md-12">
+                                <label for="modal_awal" class="form-label">Nominal</label>
+                                <input type="number" class="form-control" name="modal_awal"  id="modal_awal" placeholder="3200000">
+                            </div>
+                            
+                        </div>
+                        <table id="saldoAwalTable" class="w-100 table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nominal</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{-- END MODAL AWAL --}}
     
-    <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#formModalPengeluaran">
-        Pengeluaran
-    </button>
-    
-    <a href="/fins" type="button" class="btn btn-primary mb-4">
-        FINS
-    </a>
-    
-        <button type="button" class="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#formModalPenjualan">
-            Tambah Penjualan
-        </button>
+
+    {{-- MODAL PARTNER --}}
+    <div class="modal fade" id="formModalPartner" tabindex="-1" aria-labelledby="formModalPartnerLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form id="formPartner">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="formModalPartnerLabel">Form Partner</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3 mb-4">
+                            
+                            <div class="col-md-12">
+                                <label for="nama_partner" class="form-label">Nama</label>
+                                <input type="text" class="form-control" name="nama_partner"  id="nama_partner" placeholder="Dian">
+                                <input type="hidden" class="form-control" name="id_partner"  id="id_partner" placeholder="0">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="persentase" class="form-label">Persentase</label>
+                                <input type="number" class="form-control text-uppercase" name="persentase"  id="persentase" placeholder="10">
+                            </div>
+                        </div>
+                        <table id="partnerTable" class="w-100 table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>Persentase</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{-- END MODAL PARTNER --}}
     
     {{-- MODAL PENJUALAN --}}
     <div class="modal fade" id="formModalPenjualan" tabindex="-1" aria-labelledby="formModalPenjualanLabel" aria-hidden="true">
@@ -66,7 +193,28 @@
                             
                             <div class="col-md-12">
                                 <label for="bonus_nominal" class="form-label">BONUS (jika ada)</label>
-                                <input type="number" class="form-control text-uppercase" name="bonus_nominal"  id="bonus_nominal" placeholder="1.000.000">
+                                {{-- <input type="number" class="form-control text-uppercase" name="bonus_nominal"  id="bonus_nominal" placeholder="1.000.000"> --}}
+                               @foreach ($partner as $item)
+                                    <div class="row mb-3 align-items-center">
+                                        <div class="col-12 col-md-6">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-people fs-4"></i>
+                                                <div class="fw-bold">{{ $item->nama }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <!-- Tambahkan input hidden untuk id partner -->
+                                            <input type="hidden" name="id_partner[]" value="{{ $item->id }}">
+                                            <input 
+                                                type="number" 
+                                                class="form-control text-uppercase" 
+                                                name="bonus_nominal[]" 
+                                                placeholder="1.000.000"
+                                            >
+                                        </div>
+                                    </div>
+                                @endforeach
+
                             </div>
                         </div>
                         <table id="penjualanTable" class="w-100 table table-bordered">
@@ -116,12 +264,12 @@
                             </div>
                             <div class="col-md-12">
                                 <label for="nama_pengeluaran" class="form-label">Nama</label>
-                                <input type="text" class="form-control text-uppercase" name="nama_pengeluaran"  id="nama_pengeluaran" placeholder="Solder">
+                                <input type="text" class="form-control text-uppercase" name="nama_pengeluaran"  id="nama_pengeluaran" placeholder="Kunci Shock">
                                 <input type="hidden" class="form-control text-uppercase" name="idHidePengeluaran"  id="idHidePengeluaran" placeholder="Motor">
                             </div>
                             <div class="col-md-12">
                                 <label for="pengeluaran_nominal" class="form-label">NOMINAL</label>
-                                <input type="number" class="form-control text-uppercase" name="pengeluaran_nominal"  id="pengeluaran_nominal" placeholder="Solder">
+                                <input type="number" class="form-control text-uppercase" name="pengeluaran_nominal"  id="pengeluaran_nominal" placeholder="20000">
                             </div>
                         </div>
                         <table id="pengeluaranTable" class="w-100 table table-bordered">
@@ -475,13 +623,7 @@
         </div>
     </div>
 
-    {{-- ENDMODALDETIAL --}}
-        <!-- START DATA -->
-        <!-- Tempat render semua card -->
-    <div id="fotosContainer" class="row ">
-            <!-- Card akan ditambahkan di sini -->
-    </div>
-    <!-- END DATA -->
+   
     
     
    

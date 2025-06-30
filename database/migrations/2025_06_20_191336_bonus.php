@@ -11,17 +11,17 @@ return new class extends Migration
      *
      * @return void
      */
-    public function up()
+   public function up()
     {
-        Schema::create('types', function (Blueprint $table) {
+        Schema::create('bonus', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
-            $table->integer('kategori_id');
-            $table->integer('merek_id');
-            $table->string('nama')->unique();
+            $table->foreignId('data_id')->constrained('data')->onDelete('cascade');
+            $table->foreignId('partner_id')->constrained('partners')->onDelete('cascade');
+            $table->integer('nominal')->nullable();
+            $table->integer('status')->default(1);
             $table->timestamps();
         });
-
     }
 
     /**
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-         Schema::dropIfExists('spareparts');
+         Schema::dropIfExists('bonus');
     }
 };

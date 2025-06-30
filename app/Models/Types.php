@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Types extends Model
 {
     use HasFactory;
-    protected $tabel = 'types';
+    protected $table = 'types';
     protected $guarded = [];
 
     public function kategori()

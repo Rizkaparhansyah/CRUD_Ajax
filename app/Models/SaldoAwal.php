@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class SaldoAwal extends Model
 {
      use HasFactory;
-    protected $tabel = 'spareparts';
+    protected $table = 'saldo_awals';
     protected $guarded = [];
 
 }

@@ -29,25 +29,31 @@
     function renderList() {
         let html = '';
         sparepartList.forEach((item, index) => {
-        html += `
-            <div class="d-flex justify-content-between fw-bold align-items-center border p-2 rounded mb-2">
-            <div>
-                ${item.nama} - ${formatNumberToRupiah(item.nominal)}
-            </div>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">hapus</button>
-            </div>
+       html += `
+        <div class="d-flex justify-content-between fw-bold align-items-center border p-2 rounded mb-2">
+            <div>${item.nama} - ${formatNumberToRupiah(item.nominal)}</div>
+            <button type="button" class="btn btn-danger btn-sm btn-hapus" data-index="${index}">
+                <i class="bi bi-trash text-white"></i>
+            </button>
+        </div>
         `;
+
         });
 
         $('.list').html(html);
         $('#inputSpareparts').val(JSON.stringify(sparepartList));
     }
 
-    function removeItem(index) {
+  
+    $(document).on('click', '.btn-hapus', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const index = $(this).data('index');
         sparepartList.splice(index, 1);
         renderList();
-    }
-    
+    });
+
     function getAPI(url) {
         return new Promise(function(resolve, reject) {
             $.ajax({
@@ -109,7 +115,6 @@
             <li class="list-group-item text-uppercase fw-bold">Warna: ${data.warna ?? '-'}</li>
             <li class="list-group-item text-uppercase fw-bold">Tahun: ${data.tahun ?? '-'}</li>
             <li class="list-group-item text-uppercase fw-bold">Pajak: ${data.pajak ?? '-'}</li>
-            <li class="list-group-item text-uppercase fw-bold">Bonus: ${data.bonus ?? '-'}</li>
             <li class="list-group-item text-uppercase">
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="fw-bold">Total Harga:</span>
@@ -189,41 +194,47 @@
                         : 'https://via.placeholder.com/300x200?text=No+Image';
 
                     const card = `
-                    <div class="card position-relative col-md-4 p-3">
-                            <!-- ICON STATUS DI POJOK KANAN ATAS -->
+                    <div class="col-12 col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 position-relative">
                             ${data.status == 1
                                 ? `<i class="bi px-2 bg-success rounded bi-check text-white position-absolute top-0 end-0 m-2 fs-4"></i>`
                                 : `<i class="bi px-2 rounded bg-white bi-hourglass-split text-warning position-absolute top-0 end-0 m-2 fs-4"></i>`
                             }
 
-                            <img src="${fotoPath}" class="card-img-top" style="height: 200px; width: 100%; object-fit: cover; object-position: center;" alt="Foto Kendaraan">
+                            <img src="${fotoPath}" class="card-img-top img-fluid"
+                                style="height: 200px; object-fit: cover;" alt="Foto Kendaraan">
 
-                            <div class="card-body text-uppercase">
-                                <h5 class="card-title fw-bold">${data.tipe.nama ?? 'Tipe'} - ${data.nopol ?? 'Nopol'}</h5>
+                            <div class="card-body text-uppercase d-flex flex-column justify-content-between">
+                            <div>
+                                <h5 class="card-title fw-bold">${data.tipe?.nama ?? 'Tipe'} - ${data.nopol ?? 'Nopol'}</h5>
                                 <p class="card-text">Warna: ${data.warna ?? '-'}</p>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="fs-6">Harga Modal: </div>
-                                    <div class="card-title fw-bold fs-1">${formatNumberToRupiah(data.biayas?.reduce((sum, item) => sum + (item.nominal || 0), 0))}</div>    
-                                </div>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="fs-6">Harga Jual: </div>
-                                    <div class="card-title fw-bold fs-1">${formatNumberToRupiah(data.harga_terjual ?? 0)}</div>    
-                                </div>
-                                
-                                <div class="d-flex justify-content-between gap-2">
-                                    <button onclick='showDetailModal(${JSON.stringify(data)})' class="btn btn-primary w-75">
-                                        <i class="bi px-2 rounded bi-eye text-white"></i>
-                                        Detail</button>
-                                    
-                                    <button onclick='showEditModal(${JSON.stringify(data)})' class="btn btn-warning w-75 text-white">
-                                        <i class="bi px-2 rounded bi-pen text-white"></i>
-                                        Edit
-                                    </button>
 
+                                <div class="d-flex justify-content-between">
+                                <div class="fs-6">Harga Modal:</div>
+                                <div class="fw-bold text-end text-primary">
+                                    ${formatNumberToRupiah(data.biayas?.reduce((sum, item) => sum + (item.nominal || 0), 0))}
+                                </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                <div class="fs-6">Harga Jual:</div>
+                                <div class="fw-bold text-end text-success">
+                                    ${formatNumberToRupiah(data.harga_terjual ?? 0)}
+                                </div>
                                 </div>
                             </div>
-                        </div>
 
+                            <div class="d-flex gap-2 mt-3">
+                                <button onclick='showDetailModal(${JSON.stringify(data)})' class="btn btn-primary w-100">
+                                <i class="bi bi-eye me-1"></i> Detail
+                                </button>
+                                <button onclick='showEditModal(${JSON.stringify(data)})' class="btn btn-warning w-100 text-white">
+                                <i class="bi bi-pen me-1"></i> Edit
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
                     `;
                     $('#fotosContainer').append(card);
                 });
@@ -272,15 +283,30 @@
             { data: 'harga', name: 'harga', render: function(data, type, row) {
                 return formatNumberToRupiah(data);
             } }, // ← tampilkan nama kategori
-            { data: 'bonus', name: 'bonus' , render: function(data, type, row) {
-                return formatNumberToRupiah(data);
-            }}, // ← tampilkan nama kategori
+                    {
+                data: 'bonus',
+                name: 'bonus',
+                render: function (data, type, row) {
+                 return null;
+            }}
+            ,
+ // ← tampilkan nama kategori
             { data: 'harga_terjual', name: 'harga_terjual', render: function(data, type, row) {
                 return formatNumberToRupiah(data);
             } }, // ← tampilkan nama kategori
             { data: 'laba', name: 'laba', render: function(data, type, row) {
                 return formatNumberToRupiah(data);
             } }, // ← tampilkan nama kategori
+        ]);
+        Table('#saldoAwalTable', 'saldo-modal', [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+            { data: 'nominal', name: 'nominal' },
+        ]);
+        Table('#partnerTable', 'partner', [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+            { data: 'nama', name: 'nama' },
+            { data: 'persentase', name: 'persentase' },
+            { data: 'aksi', name: 'aksi' },
         ]);
 
     // END TABLE
@@ -295,11 +321,111 @@
         async function formCrud(init) {
             const response = await postAPI(init?.api?.url, init?.api?.data, init?.api?.method);
             
-            $(init.table).DataTable().ajax.reload();
-            $(init.idHide).val('')
-            $(init.form)[0].reset();
+            $(init?.table).DataTable().ajax.reload();
+            $(init?.idHide).val('')
+            $(init?.form)[0].reset();
+            return response;
         }
     // end fungsi reuseble crud
+
+    // PARTNER
+
+    $('#formPartner').on('submit', async function (e) {
+        e.preventDefault();
+        // let id = $('#kendaraan_id').val()
+        const data = {
+            api : {
+                url: `partner`,
+                data :  new FormData(this),
+                // method : 'PATCH'
+            },
+            table: '#partnerTable',
+            idHide: '#id_partner',
+            form: '#formPartner',
+        }
+        const res = await formCrud(data)
+        if(res.error){
+            alert(res.message)
+        }
+    });
+
+    $(document).on('click', '.editPartner', function () {
+        let id = $(this).data('id');
+        let nama = $(this).data('nama');
+        let persentase = $(this).data('persentase');
+        $('#persentase').val(persentase)
+        console.log('persentase', persentase)
+        const init = {
+            id : '#id_partner',
+            nama : '#nama_partner',
+            valID : id,
+            valNama : nama,
+        }
+        editCrud(init)
+    });
+
+    $(document).on('click', '.deletePartner', async function () {
+        let id = $(this).data('id');
+        await postAPI(`partner/${id}`, null, 'DELETE');
+        $('#partnerTable').DataTable().ajax.reload();
+    });
+
+    $(document).on('click', '.ownwerPartner', async function () {
+        const id = $(this).data('id');
+        console.log('Set as Owner: ID', id);
+        
+        // Contoh AJAX: ubah ke Owner
+        const data = {
+            api : {
+                url: `partner/${id}`,
+                data :  null,
+                method : 'PUT'
+            },
+            table: '#partnerTable',
+            idHide: '',
+            form: '#formPartner',
+        }
+        const res = await formCrud(data)
+        console.log('first', res)
+        alert(res.message)
+    });
+    
+    $(document).on('click', '#kas', async function () {
+        const data = {
+            api : {
+                url: `partner/kas`,
+                method : 'POST'
+            },
+            table: '#partnerTable',
+            idHide: '',
+            form: '#formPartner',
+        }
+        const res = await formCrud(data)
+        console.log('first', res)
+        alert(res.message)
+    });
+
+
+    // END PARTNER
+
+    // SALDO
+    $('#formSaldoAwal').on('submit', async function (e) {
+        e.preventDefault();
+        // let id = $('#kendaraan_id').val()
+        const data = {
+            api : {
+                url: `saldo-modal`,
+                data :  new FormData(this),
+                // method : 'PATCH'
+            },
+            table: '#saldoAwalTable',
+            idHide: '#modal_awal',
+            form: '#formSaldoAwal',
+        }
+        formCrud(data)
+    });
+
+    // END SALDO
 
     // PENJUALAN
     $('#formPenjualan').on('submit', async function (e) {
@@ -315,7 +441,9 @@
             idHide: '#idHidePenjualan',
             form: '#formPenjualan',
         }
-        formCrud(data)
+        const res = await formCrud(data)
+        console.log('first', res)
+        alert(res.message)
     });
 
     $('#kendaraan_id').on('change', async function(){
@@ -323,7 +451,20 @@
         try {
             const data = await getAPI(`list-terjual/${id}`);
             $('#penjualan_nominal').val(data.harga_terjual)
-            $('#bonus_nominal').val(data.bonus)
+            const bonuses = data.bonus || [];
+
+            $('input[name="id_partner[]"]').each(function (index) {
+                const partnerId = $(this).val();
+                const bonusInput = $('input[name="bonus_nominal[]"]').eq(index);
+
+                const foundBonus = bonuses.find(b => b.partner_id == partnerId);
+
+                if (foundBonus) {
+                    bonusInput.val(foundBonus.nominal);
+                } else {
+                    bonusInput.val(''); // Kosongkan jika tidak ada
+                }
+            });
         } catch (err) {
             console.error('Gagal ambil data:', err);
             alert('Gagal mengambil data. Cek console.');
@@ -498,7 +639,9 @@
                 idHide: '#id_nama_pengeluaran',
                 form: '#formPengeluaran',
             }
-            formCrud(data)
+            const res = await formCrud(data)
+            console.log('first', res)
+            alert(res.message)
             renderData()
         });
 

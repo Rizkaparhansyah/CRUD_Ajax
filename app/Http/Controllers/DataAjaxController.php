@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Data;
 use App\Models\Merek;
+use App\Models\Partner;
+use App\Models\SaldoAwal;
+use App\Models\Bonus;
 use App\Models\Types;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -118,7 +121,6 @@ class DataAjaxController extends Controller
             $data->fotos()->create(['path' => $path]);
         }
     }
-
     return response()->json(['success' => true]);
 }
 

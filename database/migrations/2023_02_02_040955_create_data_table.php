@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('data', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
             $table->integer('kategori_id');
             $table->integer('merek_id');
             $table->integer('type_id');
@@ -24,7 +25,6 @@ return new class extends Migration
             $table->string('pajak');
             $table->integer('harga');
             $table->integer('harga_terjual')->default(0)->nullable();
-            $table->integer('bonus')->default(0)->nullable();
             $table->string('status')->default(0);
             $table->timestamps();
         });

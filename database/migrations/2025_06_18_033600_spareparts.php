@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('spareparts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
             $table->string('nama')->unique();
             $table->timestamps();
         });
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+         Schema::dropIfExists('spareparts');
     }
 };
