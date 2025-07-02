@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('data_id')->nullable()->constrained('data')->onDelete('cascade');
             $table->string('nama');
             $table->integer('nominal');
-            $table->integer('from')->nullable();
+            $table->integer('from')->default(0);
             $table->timestamps();
         });
     }
