@@ -192,23 +192,23 @@ class PengeluaranController extends Controller
         }
 
         // hitung laba
-        $laba = 0;
-        $semuaData = Data::whereNotNull('harga_terjual')->where('status', 1)->get();
-        foreach ($semuaData as $data) {
-            $labaPerItem = $data->harga_terjual - $data->harga;
-            $laba += $labaPerItem;
-        }
+        // $laba = 0;
+        // $semuaData = Data::whereNotNull('harga_terjual')->where('status', 1)->get();
+        // foreach ($semuaData as $data) {
+        //     $labaPerItem = $data->harga_terjual - $data->harga;
+        //     $laba += $labaPerItem;
+        // }
         
-        (int) $total_bonus = Bonus::sum('nominal');
-        $total_laba = $laba;
-        // end hitung laba
+        // (int) $total_bonus = Bonus::sum('nominal');
+        // $total_laba = $laba;
+        // // end hitung laba
 
-        //persentase saldo
-        $persentaseKas = Partner::where('kas', 1)->first();
-        //endpersentase saldo
-        $saldo_baru = $total_laba * ($persentaseKas->persentase / 100);
-        // dd($saldo_baru);
-        $saldo_awal->update(['saldo_kas' => $saldo_baru]);
+        // //persentase saldo
+        // $persentaseKas = Partner::where('kas', 1)->first();
+        // //endpersentase saldo
+        // $saldo_baru = $total_laba * ($persentaseKas->persentase / 100);
+        // // dd($saldo_baru);
+        // $saldo_awal->update(['saldo_kas' => $saldo_baru]);
 
         return response()->json(["message" => 'Berhasil']);
     }
@@ -228,12 +228,13 @@ class PengeluaranController extends Controller
                    return ($row->harga_terjual - $row->harga);
                 })
                 ->addColumn('bonus', function ($row) {
-                    return $row->bonus->map(function ($bonus) {
-                        return [
-                            'nama' => $bonus->partner->nama ?? 'Unknown',
-                            'bonus' => $bonus->nominal
-                        ];
-                    })->values();
+                    return  $row->nominal;
+                    // return $row->bonus->map(function ($bonus) {
+                    //     return [
+                    //         'nama' => $bonus->partner->nama ?? 'Unknown',
+                    //         'bonus' => $bonus->nominal
+                    //     ];
+                    // })->values();
                 })
 
                 ->rawColumns(['nama', 'bonus', 'laba']) // agar HTML tidak di-escape
