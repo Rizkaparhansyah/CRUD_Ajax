@@ -56,12 +56,12 @@ class PengeluaranController extends Controller
                 $totalLaba += $labaPerItem;
             }
     
-            $owner = Partner::where('owner', 1)->first();
-            $labaOwner = ($totalLaba * ($owner->persentase / 100)) - Bonus::sum('nominal');
-            // cek laba si owner
-            if((int) $request->pengeluaran_nominal > $labaOwner){
-                return response()->json(["message" => 'Saldo tidak cukup!']);
-            }
+        }
+        $owner = Partner::where('owner', 1)->first();
+        $labaOwner = ($totalLaba * ($owner->persentase / 100)) - Bonus::sum('nominal');
+        // cek laba si owner
+        if((int) $request->pengeluaran_nominal > $labaOwner){
+            return response()->json(["message" => 'Saldo tidak cukup!']);
         }
         // jika ambil dari kass
         // elseif(){
