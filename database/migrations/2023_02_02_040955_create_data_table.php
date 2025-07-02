@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('data', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companys')->onDelete('cascade');
             $table->integer('kategori_id');
             $table->integer('merek_id');
             $table->integer('type_id');
@@ -40,13 +40,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('data');
     }
-    public function fotos()
-    {
-        return $this->hasMany(DataFoto::class);
-    }
-    public function biayas()
-    {
-        return $this->hasMany(DatBiaya::class);
-    }
-
+ 
 };

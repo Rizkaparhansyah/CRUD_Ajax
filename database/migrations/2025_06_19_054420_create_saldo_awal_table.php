@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('saldo_awals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companys')->onDelete('cascade');
             $table->integer('nominal')->default(0);
             $table->integer('saldo_kas')->default(0);
             $table->timestamps();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('saldo_awal');
+        Schema::dropIfExists('saldo_awals');
     }
 };

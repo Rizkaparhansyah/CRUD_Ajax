@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('types', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companys')->onDelete('cascade');
             $table->integer('kategori_id');
             $table->integer('merek_id');
             $table->string('nama')->unique();
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-         Schema::dropIfExists('spareparts');
+         Schema::dropIfExists('types');
     }
 };

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('partners', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companys')->onDelete('cascade');
             $table->string('nama');
             $table->integer('persentase')->nullable();
             $table->integer('owner')->default(0);

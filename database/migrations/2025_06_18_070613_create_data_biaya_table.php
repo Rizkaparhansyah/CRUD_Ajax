@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('data_biayas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companys')->onDelete('cascade');
             $table->foreignId('data_id')->nullable()->constrained('data')->onDelete('cascade');
             $table->string('nama');
             $table->integer('nominal');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('data_biaya');
+        Schema::dropIfExists('data_biayas');
     }
 };

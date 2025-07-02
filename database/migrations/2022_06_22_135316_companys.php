@@ -16,7 +16,7 @@ return new class extends Migration
        Schema::create('companys', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->foreignId('owner_id')->constrained('partners')->onDelete('cascade');
+            $table->unsignedBigInteger('owner_id');
             $table->timestamps();
         });
     }

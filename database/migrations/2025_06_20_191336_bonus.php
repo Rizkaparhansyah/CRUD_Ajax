@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('bonus', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companys')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companys')->onDelete('cascade');
             $table->foreignId('data_id')->constrained('data')->onDelete('cascade');
             $table->foreignId('partner_id')->constrained('partners')->onDelete('cascade');
             $table->integer('nominal')->nullable();
