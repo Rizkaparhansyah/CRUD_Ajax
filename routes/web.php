@@ -58,7 +58,7 @@ Route::get('/fins', function () {
     // end laba
 
     // total oprasional
-    (int) $oprasional = DataBiaya::where('nama', '!=', 'Harga Barang')->where('from', '!=', 1)->sum('nominal');
+    (int) $oprasional = DataBiaya::where('nama', '!=', 'Harga Barang')->where('from', 0)->whereNull('from')->sum('nominal');
     // end total oprasional
 
     // harga modal
