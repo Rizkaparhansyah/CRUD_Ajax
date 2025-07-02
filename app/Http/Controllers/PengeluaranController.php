@@ -29,6 +29,7 @@ class PengeluaranController extends Controller
     }
     public function store(Request $request) { 
         $saldo_awal = SaldoAwal::first();
+        $labaOwner = 0;
        // total oprasional
         (int) $oprasional = DataBiaya::where('nama', '!=', 'Harga Barang')->sum('nominal');
         // end total oprasional
